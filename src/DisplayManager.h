@@ -24,7 +24,7 @@ private:
     //void render(UIManager& ui);
 
     void drawMain();
-    void drawSettings(MenuState menu);
+    void drawMenu(const UIManager& ui);
     //void drawColor(UIManager& ui);
     void drawBatteryInfo(BatteryManager battery);
     //void drawBLE(UIManager& ui);

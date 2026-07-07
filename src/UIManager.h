@@ -1,18 +1,21 @@
 #pragma once
 
 #include "UIState.h"
+#include "MenuData.h"
 
 class UIManager {
 public:
-    void begin();
+    //void begin();
     //void update();
 
     void onRotate(int delta);
     void onClick();
     void onLongPress();
 
+    int getSelectedMenuIndex() const;
+    int getScrollOffset() const;
     Screen getScreen() const;
-    MenuState getMenu() const; //메뉴있는경우 가지고있는 정보 반환.
+    Menu getMenu() const; //메뉴있는경우 가지고있는 정보 반환.
 
     //void setBattery(float voltage, float percent);
     //float getBatteryVoltage() const;
@@ -26,7 +29,7 @@ public:
 
 private:
     Screen currentScreen = SCREEN_MAIN;
-    MenuState currentMenu;
+    Menu currentMenu;
     
 
     //float batteryVoltage = 0.0f;

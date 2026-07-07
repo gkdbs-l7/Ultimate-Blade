@@ -46,7 +46,7 @@ void DisplayManager::rander(const UIManager& ui, const BatteryManager& battery) 
 
         case SCREEN_SETTINGS:
 
-            drawSettings(ui.getMenu());
+            drawMenu(ui);
             break;
 
         case SCREEN_SETTING_BATTERY:
@@ -87,6 +87,24 @@ void DisplayManager::drawBatteryInfo(BatteryManager battery) {
 
 }
 
-void DisplayManager::drawSettings(MenuState menu) {
+void DisplayManager::drawMenu(const UIManager& ui) {
+
+    Menu menu = ui.getMenu();
+
+    display.setTextSize(2);
+    display.setCursor(0, 0);
+    display.println(menu.title);
+
+
+    display.setTextSize(2);
+    display.setCursor(0, 20);
+    display.println(menu.items[ui.getScrollOffset()].label);
+    display.println(menu.items[ui.getScrollOffset() + 1].label);
+
+    display.setCursor(110, (ui.getSelectedMenuIndex() - ui.getScrollOffset()) * 20 + 20);
+    display.print("O");
+
+    display.display();
+
     return;
 }
