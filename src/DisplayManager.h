@@ -28,9 +28,10 @@ private:
     //void drawColor(UIManager& ui);
     void drawBatteryInfo(BatteryManager battery);
     //void drawBLE(UIManager& ui);
-    //void drawAbout();
+    void drawAbout();
+    int findSpaceForCenter(String text);
 
-    //void drawHeader(const char* title);
+    void drawHeader(const String title);
     //void drawBatteryIcon(float percent);
     //void drawMenuList(MenuState menu);
 };

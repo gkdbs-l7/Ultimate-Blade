@@ -30,6 +30,7 @@ void UIManager::onRotate(int delta) {
             break;
     
         case SCREEN_SETTINGS:
+        case SCREEN_CONNECTIVITY:
 
             if (delta > 0 && menuSelectedIndex != currentMenu.itemCount - 1) {
 
@@ -82,11 +83,43 @@ void UIManager::onClick() {
                 case SCREEN_ABOUT:
                     currentScreen = SCREEN_ABOUT;
                     break;
+
+                case SCREEN_CONNECTIVITY:
+                    currentScreen = SCREEN_CONNECTIVITY;
+                    currentMenu = SETTINGS_CONNECTIVITY_MENU;
+                    menuSelectedIndex = 0;
+                    menuScrollOffset = 0;
+                    
+                    break;
             }
             break;
         case SCREEN_SETTING_BATTERY:
             
             currentScreen = SCREEN_SETTINGS;
+            break;
+
+        case SCREEN_ABOUT:
+            
+            currentScreen = SCREEN_SETTINGS;
+            break;
+
+        case SCREEN_CONNECTIVITY:
+
+            switch (currentMenu.items[menuSelectedIndex].targetScreen) {
+                case SCREEN_SETTINGS:
+                    currentScreen = SCREEN_SETTINGS;
+                    currentMenu = SETTINGS_MENU;
+                    menuSelectedIndex = 0;
+                    menuScrollOffset = 0;
+                    break;
+
+                case SCREEN_SETTING_WIFI:
+                    break;
+
+                case SCREEN_SETTING_ESP_NOW:
+                    break;
+                    
+            }
             break;
     }
 
