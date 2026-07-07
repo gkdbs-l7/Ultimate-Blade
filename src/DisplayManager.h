@@ -25,13 +25,17 @@ private:
 
     void drawMain();
     void drawMenu(const UIManager& ui);
-    //void drawColor(UIManager& ui);
+    void drawBrightControl(const UIManager& ui);
     void drawBatteryInfo(BatteryManager battery);
-    //void drawBLE(UIManager& ui);
+    //void drawWIFI(const UIManager& ui);
     void drawAbout();
     int findSpaceForCenter(String text);
 
     void drawHeader(const String title);
     //void drawBatteryIcon(float percent);
     //void drawMenuList(MenuState menu);
+
+
+    void applyBrightness(int brightness);
+    int lastBrightness = 255;
 };

@@ -17,6 +17,9 @@ public:
     Screen getScreen() const;
     Menu getMenu() const; //메뉴있는경우 가지고있는 정보 반환.
 
+    int getDisplayBrightness() const;
+    void changeDisplayBrightness(int delta);
+
     //void setBattery(float voltage, float percent);
     //float getBatteryVoltage() const;
     //float getBatteryPercent() const;
@@ -40,6 +43,8 @@ private:
 
     int menuSelectedIndex = 0;
     int menuScrollOffset = 0;
+
+    int displayBrightness = 255;
 
     void scrollMenu(int delta);
     void selectMenu();

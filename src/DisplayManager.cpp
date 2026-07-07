@@ -6,12 +6,15 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-void DisplayManager::begin() {
+void DisplayManager::begin()
+{
     Wire.begin(21, 22); // ESP32 기본 SDA, SCL
-    
-    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+    {
         Serial.println("OLED init failed");
-        while (true);
+        while (true)
+            ;
     }
 
     display.clearDisplay();
@@ -28,57 +31,87 @@ void DisplayManager::begin() {
     display.display();
 }
 
-void DisplayManager::rander(const UIManager& ui, const BatteryManager& battery) {
-    if (millis() - lastUpdate < updateInterval) {
+void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery)
+{
+    if (millis() - lastUpdate < updateInterval)
+    {
         return;
     }
 
     lastUpdate = millis();
 
-    
+    if (ui.getDisplayBrightness() != lastBrightness)
+    {
+        lastBrightness = ui.getDisplayBrightness();
+        applyBrightness(lastBrightness);
+    }
+
     display.clearDisplay();
 
-    switch (ui.getScreen()) {
-        case SCREEN_MAIN:
+    switch (ui.getScreen())
+    {
+    case SCREEN_MAIN:
 
-            drawMain();
-            break;
+        drawMain();
+        break;
 
-        case SCREEN_SETTINGS:
+    case SCREEN_SETTINGS:
+    case SCREEN_CONNECTIVITY:
+    case SCREEN_SETTING_WIFI:
+    case SCREEN_SETTING_BRIGHTNESS:
 
-            drawMenu(ui);
-            break;
+        drawMenu(ui);
+        break;
 
-        case SCREEN_SETTING_BATTERY:
+    case SCREEN_SETTING_BATTERY:
 
-            drawBatteryInfo(battery);
-            break; 
-            
-        case SCREEN_ABOUT:
+        drawBatteryInfo(battery);
+        break;
 
-            drawAbout();
-            break;
+    case SCREEN_ABOUT:
 
-        case SCREEN_CONNECTIVITY:
+        drawAbout();
+        break;
 
-            drawMenu(ui);
-            break;
+    case SCREEN_SETTING_BRIGHTNESS_OLED:
+    case SCREEN_SETTING_BRIGHTNESS_BLADE:
 
+        drawBrightControl(ui);
+        break;
     }
 
     display.display();
 }
 
-void DisplayManager::drawMain() {
+void DisplayManager::drawMain()
+{
 
     display.setTextSize(2);
     display.setCursor(0, 0);
     display.println("MAIN~");
 
+    /*const unsigned char wifiIcon[] PROGMEM = {
+        0b00011000,
+        0b00111100,
+        0b01111110,
+        0b11011011,
+        0b00011000,
+        0b00100100,
+        0b01000010,
+        0b00000000
+    };
+
+    display.drawBitmap(
+    110, 0,
+    wifiIcon,
+    8, 8,
+    SSD1306_WHITE
+);*/
 }
 
-void DisplayManager::drawBatteryInfo(BatteryManager battery) {
-    
+void DisplayManager::drawBatteryInfo(BatteryManager battery)
+{
+
     drawHeader("Battery Information");
 
     display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
@@ -100,11 +133,10 @@ void DisplayManager::drawBatteryInfo(BatteryManager battery) {
     display.setCursor(0, 48);
     display.print("isCharging: ");
     display.println("No");
-
-
 }
 
-void DisplayManager::drawMenu(const UIManager& ui) {
+void DisplayManager::drawMenu(const UIManager &ui)
+{
 
     Menu menu = ui.getMenu();
 
@@ -117,17 +149,22 @@ void DisplayManager::drawMenu(const UIManager& ui) {
     const int itemH = 20;
     const int visibleCount = 2;
 
-    for (int i = 0; i < visibleCount; i++) {
+    for (int i = 0; i < visibleCount; i++)
+    {
         int itemIndex = offset + i;
-        if (itemIndex >= menu.itemCount) break;
+        if (itemIndex >= menu.itemCount)
+            break;
 
         int y = itemY + i * itemH;
         bool isSelected = (itemIndex == selected);
 
-        if (isSelected) {
+        if (isSelected)
+        {
             display.fillRoundRect(0, y - 2, 116, 18, 3, SSD1306_WHITE);
             display.setTextColor(SSD1306_BLACK);
-        } else {
+        }
+        else
+        {
             display.setTextColor(SSD1306_WHITE);
         }
 
@@ -139,7 +176,8 @@ void DisplayManager::drawMenu(const UIManager& ui) {
     }
 
     // 스크롤바
-    if (menu.itemCount > visibleCount) {
+    if (menu.itemCount > visibleCount)
+    {
         int barX = 124;
         int barY = 14;
         int barH = 48;
@@ -153,14 +191,13 @@ void DisplayManager::drawMenu(const UIManager& ui) {
         display.fillRect(barX + 1, thumbY, barWidth - 2, thumbH, SSD1306_WHITE);
     }
 
-
     return;
 }
 
-void DisplayManager::drawAbout() {
+void DisplayManager::drawAbout()
+{
 
     display.setTextColor(SSD1306_WHITE);
-    display.clearDisplay();
 
     // 제목
     drawHeader("Ultimate Blade");
@@ -182,25 +219,64 @@ void DisplayManager::drawAbout() {
     display.println("github.com");
     display.setCursor(0, 56);
     display.println("gkdbs-l7");
-
 }
 
-void DisplayManager::drawHeader(const String title) {
+void DisplayManager::drawBrightControl(const UIManager &ui)
+{
+    if (ui.getScreen() == SCREEN_SETTING_BRIGHTNESS_OLED)
+    {
+        int brightness = ui.getDisplayBrightness();
+        drawHeader("Display Brightness");
+
+        display.setTextSize(2);
+        display.setCursor(findSpaceForCenter((String)brightness), 20);
+        display.print(brightness);
+
+        int barX = 8;
+        int barY = 45;
+        int barW = 112;
+        int barH = 10;
+
+        display.drawRoundRect(barX, barY, barW, barH, 2, SSD1306_WHITE);
+
+        int fillW = map(brightness, 0, 255, 0, barW - 2);
+        display.fillRect(barX + 1, barY + 1, fillW, barH - 2, SSD1306_WHITE);
+
+        display.setTextSize(1);
+        display.setCursor(findSpaceForCenter("Turn adjust"), 57);
+        display.print("Turn adjust");
+    }
+    else if (ui.getScreen() == SCREEN_SETTING_BRIGHTNESS_BLADE)
+    {
+
+        drawHeader("Blade Brightness");
+    }
+}
+
+void DisplayManager::drawHeader(const String title)
+{
     display.setTextSize(1);
     display.setCursor(findSpaceForCenter(title), 0);
     display.println(title);
     display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
 }
 
-int DisplayManager::findSpaceForCenter(String text) {
-  int16_t x1, y1;
-  uint16_t width, height;
+int DisplayManager::findSpaceForCenter(String text)
+{
+    int16_t x1, y1;
+    uint16_t width, height;
 
-  // 글자가 차지하는 가로/세로 크기(pixel) 계산
-  display.getTextBounds(text, 0, 0, &x1, &y1, &width, &height);
+    // 글자가 차지하는 가로/세로 크기(pixel) 계산
+    display.getTextBounds(text, 0, 0, &x1, &y1, &width, &height);
 
-  // 화면 가로 길이(예: 128)의 절반에서 글자 너비의 절반을 뺀 위치를 계산
-  int center_x = (display.width() - width) / 2;
+    // 화면 가로 길이(예: 128)의 절반에서 글자 너비의 절반을 뺀 위치를 계산
+    int center_x = (display.width() - width) / 2;
 
-  return center_x;
+    return center_x;
+}
+
+void DisplayManager::applyBrightness(int brightness)
+{
+    display.ssd1306_command(SSD1306_SETCONTRAST);
+    display.ssd1306_command(brightness);
 }

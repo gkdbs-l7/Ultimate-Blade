@@ -1,134 +1,224 @@
 #include "UIManager.h"
 
+#include <Arduino.h>
+
 /*void UIManager::begin() {
     return;
 }*/
 
-Screen UIManager::getScreen() const {
+Screen UIManager::getScreen() const
+{
     return currentScreen;
 }
 
-Menu UIManager::getMenu() const {
+Menu UIManager::getMenu() const
+{
     return currentMenu;
 }
 
-int UIManager::getSelectedMenuIndex() const {
+int UIManager::getSelectedMenuIndex() const
+{
     return menuSelectedIndex;
 }
 
-int UIManager::getScrollOffset() const {
+int UIManager::getScrollOffset() const
+{
     return menuScrollOffset;
 }
 
+int UIManager::getDisplayBrightness() const
+{
+    return displayBrightness;
+}
 
-void UIManager::onRotate(int delta) {
+void UIManager::changeDisplayBrightness(int delta) {
+    displayBrightness += delta;
+    displayBrightness = constrain(displayBrightness, 0, 255);
+}
 
-    switch (currentScreen) {
-        case SCREEN_MAIN:
+void UIManager::onRotate(int delta)
+{
 
-            //색변환로직
-            break;
-    
-        case SCREEN_SETTINGS:
-        case SCREEN_CONNECTIVITY:
+    switch (currentScreen)
+    {
+    case SCREEN_MAIN:
 
-            if (delta > 0 && menuSelectedIndex != currentMenu.itemCount - 1) {
+        // 색변환로직
+        break;
 
-                if (menuSelectedIndex == menuScrollOffset + 1) {
-                    menuScrollOffset += 1;
-                    menuSelectedIndex += 1;
-                } else {
-                    menuSelectedIndex += 1;
-                }
+    case SCREEN_SETTINGS:
+    case SCREEN_CONNECTIVITY:
+    case SCREEN_SETTING_WIFI:
+    case SCREEN_SETTING_BRIGHTNESS:
 
-            } else if (delta < 0 && menuSelectedIndex != 0) {
+        if (delta > 0 && menuSelectedIndex != currentMenu.itemCount - 1)
+        {
 
-                if (menuSelectedIndex == menuScrollOffset) {
-                    menuScrollOffset -= 1;
-                    menuSelectedIndex -= 1;
-                } else {
-                    menuSelectedIndex -= 1;
-                }
-
+            if (menuSelectedIndex == menuScrollOffset + 1)
+            {
+                menuScrollOffset += 1;
+                menuSelectedIndex += 1;
             }
+            else
+            {
+                menuSelectedIndex += 1;
+            }
+        }
+        else if (delta < 0 && menuSelectedIndex != 0)
+        {
 
-            break;
+            if (menuSelectedIndex == menuScrollOffset)
+            {
+                menuScrollOffset -= 1;
+                menuSelectedIndex -= 1;
+            }
+            else
+            {
+                menuSelectedIndex -= 1;
+            }
+        }
+
+        break;
+
+        case SCREEN_SETTING_BRIGHTNESS_OLED:
+        changeDisplayBrightness(delta * 5);
     }
     return;
 }
 
-void UIManager::onClick() {
+void UIManager::onClick()
+{
 
-    switch (currentScreen) {
+    switch (currentScreen)
+    {
+    case SCREEN_MAIN:
+
+        currentScreen = SCREEN_SETTINGS;
+        currentMenu = SETTINGS_MENU;
+        menuSelectedIndex = 0;
+        menuScrollOffset = 0;
+
+        break;
+
+    case SCREEN_SETTINGS:
+
+        switch (currentMenu.items[menuSelectedIndex].targetScreen)
+        {
         case SCREEN_MAIN:
+            currentScreen = SCREEN_MAIN;
+            break;
 
-            currentScreen = SCREEN_SETTINGS;
-            currentMenu = SETTINGS_MENU;
+        case SCREEN_SETTING_BRIGHTNESS:
+            currentScreen = SCREEN_SETTING_BRIGHTNESS;
+            currentMenu = SETTING_BRIGHTNESS_MENU;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
+            break;
+
+        case SCREEN_SETTING_BATTERY:
+            currentScreen = SCREEN_SETTING_BATTERY;
+            break;
+
+        case SCREEN_ABOUT:
+            currentScreen = SCREEN_ABOUT;
+            break;
+
+        case SCREEN_CONNECTIVITY:
+            currentScreen = SCREEN_CONNECTIVITY;
+            currentMenu = SETTING_CONNECTIVITY_MENU;
             menuSelectedIndex = 0;
             menuScrollOffset = 0;
 
             break;
-    
+        }
+        break;
+    case SCREEN_SETTING_BATTERY:
+    case SCREEN_ABOUT:
+
+        currentScreen = SCREEN_SETTINGS;
+        break;
+
+    case SCREEN_CONNECTIVITY:
+
+        switch (currentMenu.items[menuSelectedIndex].targetScreen)
+        {
         case SCREEN_SETTINGS:
-
-            switch (currentMenu.items[menuSelectedIndex].targetScreen) {
-                case SCREEN_MAIN:
-                    currentScreen = SCREEN_MAIN;
-                    break;
-
-                case SCREEN_SETTING_BATTERY:
-                    currentScreen = SCREEN_SETTING_BATTERY;
-                    break;
-
-                case SCREEN_ABOUT:
-                    currentScreen = SCREEN_ABOUT;
-                    break;
-
-                case SCREEN_CONNECTIVITY:
-                    currentScreen = SCREEN_CONNECTIVITY;
-                    currentMenu = SETTINGS_CONNECTIVITY_MENU;
-                    menuSelectedIndex = 0;
-                    menuScrollOffset = 0;
-                    
-                    break;
-            }
-            break;
-        case SCREEN_SETTING_BATTERY:
-            
             currentScreen = SCREEN_SETTINGS;
+            currentMenu = SETTINGS_MENU;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
             break;
 
-        case SCREEN_ABOUT:
+        case SCREEN_SETTING_WIFI:
+
             
-            currentScreen = SCREEN_SETTINGS;
+
+            currentScreen = SCREEN_SETTING_WIFI;
+            currentMenu = SETTING_WIFI_MENU;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
             break;
 
+        case SCREEN_SETTING_ESP_NOW:
+            break;
+        }
+        break;
+
+    case SCREEN_SETTING_WIFI:
+
+        switch (currentMenu.items[menuSelectedIndex].targetScreen)
+        {
         case SCREEN_CONNECTIVITY:
-
-            switch (currentMenu.items[menuSelectedIndex].targetScreen) {
-                case SCREEN_SETTINGS:
-                    currentScreen = SCREEN_SETTINGS;
-                    currentMenu = SETTINGS_MENU;
-                    menuSelectedIndex = 0;
-                    menuScrollOffset = 0;
-                    break;
-
-                case SCREEN_SETTING_WIFI:
-                    break;
-
-                case SCREEN_SETTING_ESP_NOW:
-                    break;
-                    
-            }
+            currentScreen = SCREEN_CONNECTIVITY;
+            currentMenu = SETTING_CONNECTIVITY_MENU;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
             break;
+
+        case SCREEN_SETTING_WIFI_ADD:
+
+            break;
+        }
+        break;
+
+    case SCREEN_SETTING_BRIGHTNESS:
+
+        switch (currentMenu.items[menuSelectedIndex].targetScreen)
+        {
+        case SCREEN_SETTINGS:
+            currentScreen = SCREEN_SETTINGS;
+            currentMenu = SETTINGS_MENU;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
+            break;
+
+        case SCREEN_SETTING_BRIGHTNESS_OLED:
+            currentScreen = SCREEN_SETTING_BRIGHTNESS_OLED;
+            break;
+
+        case SCREEN_SETTING_BRIGHTNESS_BLADE:
+            currentScreen = SCREEN_SETTING_BRIGHTNESS_BLADE;
+            break;
+        }
+        break;
+    
+    case SCREEN_SETTING_BRIGHTNESS_OLED:
+    case SCREEN_SETTING_BRIGHTNESS_BLADE:
+
+        currentScreen = SCREEN_SETTING_BRIGHTNESS;
+        break;
     }
+
+
+
 
     return;
 }
 
-void UIManager::onLongPress() {
+void UIManager::onLongPress()
+{
 
-    //currentScreen = SCREEN_MAIN;
+    // currentScreen = SCREEN_MAIN;
 
     return;
 }
