@@ -1,8 +1,9 @@
 #include "BatteryManager.h"
+#include "BoardPins.h"
 
 #include <Arduino.h>
 
-#define BATTERY_PIN 14
+
 
 void BatteryManager::begin() {
 

@@ -2,4 +2,4 @@
 
 #include <Arduino.h>
 
-extern const unsigned char bandLogo[];
+extern const unsigned char roseliaLogo[];

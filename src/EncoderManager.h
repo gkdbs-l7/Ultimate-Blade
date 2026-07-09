@@ -19,5 +19,6 @@ private:
 
     bool clickFlag = false;
     bool longPressFlag = false;
+    bool lastLongPressFlag = false;
 
 };

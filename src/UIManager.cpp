@@ -1,4 +1,5 @@
 #include "UIManager.h"
+#include "LedManager.h"
 
 #include <Arduino.h>
 
@@ -32,18 +33,19 @@ int UIManager::getDisplayBrightness() const
 }
 
 void UIManager::changeDisplayBrightness(int delta) {
-    displayBrightness += delta;
-    displayBrightness = constrain(displayBrightness, 0, 255);
+    displayBrightness = constrain(displayBrightness + delta, 0, 255);
 }
 
 void UIManager::onRotate(int delta)
 {
+    if (delta >= 2) delta = 1;
+    if (delta <= -2) delta = -1;
 
     switch (currentScreen)
     {
     case SCREEN_MAIN:
 
-        // 색변환로직
+        // 색변환로직 은 main.cpp에 있다와
         break;
 
     case SCREEN_SETTINGS:
@@ -81,7 +83,14 @@ void UIManager::onRotate(int delta)
         break;
 
         case SCREEN_SETTING_BRIGHTNESS_OLED:
-        changeDisplayBrightness(delta * 5);
+            changeDisplayBrightness(delta * 5);
+            break;
+
+        case SCREEN_SETTING_BRIGHTNESS_BLADE:
+            // main.cpp 에서 처리
+            break;
+
+
     }
     return;
 }
@@ -93,10 +102,10 @@ void UIManager::onClick()
     {
     case SCREEN_MAIN:
 
-        currentScreen = SCREEN_SETTINGS;
-        currentMenu = SETTINGS_MENU;
-        menuSelectedIndex = 0;
-        menuScrollOffset = 0;
+        //currentScreen = SCREEN_SETTINGS;
+        //currentMenu = SETTINGS_MENU;
+        //menuSelectedIndex = 0;
+        //menuScrollOffset = 0;
 
         break;
 
@@ -218,7 +227,15 @@ void UIManager::onClick()
 void UIManager::onLongPress()
 {
 
-    // currentScreen = SCREEN_MAIN;
+    switch (currentScreen)
+    {
+    case SCREEN_MAIN:
+        currentScreen = SCREEN_SETTINGS;
+        currentMenu = SETTINGS_MENU;
+        menuSelectedIndex = 0;
+        menuScrollOffset = 0;
+        break;
+    }
 
     return;
 }

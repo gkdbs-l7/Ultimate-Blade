@@ -1,9 +1,6 @@
 #include "EncoderManager.h"
 #include <Arduino.h>
-
-#define ENC_CLK 16
-#define ENC_DT  17
-#define ENC_SW  18
+#include <BoardPins.h>
 
 static volatile int encoderDelta = 0;
 static volatile int lastCLK = HIGH;
@@ -47,17 +44,26 @@ int EncoderManager::getDelta() {
 void EncoderManager::update() {
     bool current = digitalRead(ENC_SW);
 
-    if (lastButtonState == HIGH && current == LOW) {
+    if (lastButtonState == HIGH && current == LOW) { //눌렀을때
         buttonDownTime = millis();
+    }  
+
+    if (lastButtonState == LOW && current == LOW) {
+        unsigned long pressTime = millis() - buttonDownTime;
+        if (pressTime >= 600 && lastButtonState == false) {
+            longPressFlag = true;
+            lastButtonState = true;
+        }
     }
 
-    if (lastButtonState == LOW && current == HIGH) {
+
+    if (lastButtonState == LOW && current == HIGH) { //땠을때
         unsigned long pressTime = millis() - buttonDownTime;
 
         if (pressTime < 600) {
             clickFlag = true;
         } else {
-            longPressFlag = true;
+            lastLongPressFlag = false;
         }
     }
 

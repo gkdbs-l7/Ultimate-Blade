@@ -20,6 +20,8 @@ public:
     int getDisplayBrightness() const;
     void changeDisplayBrightness(int delta);
 
+    int colorDeltaValue;
+
     //void setBattery(float voltage, float percent);
     //float getBatteryVoltage() const;
     //float getBatteryPercent() const;

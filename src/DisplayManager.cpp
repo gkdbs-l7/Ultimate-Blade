@@ -1,5 +1,10 @@
 #include "DisplayManager.h"
 #include "BatteryManager.h"
+#include "LedManager.h"
+#include "BoardPins.h"
+
+#include "logos/Roselia.h"
+#include "logos/Popipa.h"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -8,7 +13,7 @@
 
 void DisplayManager::begin()
 {
-    Wire.begin(21, 22); // ESP32 기본 SDA, SCL
+    Wire.begin(OLED_SDA, OLED_SCL); // ESP32 기본 SDA, SCL
 
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
     {
@@ -31,7 +36,7 @@ void DisplayManager::begin()
     display.display();
 }
 
-void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery)
+void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, LedManager led)
 {
     if (millis() - lastUpdate < updateInterval)
     {
@@ -52,7 +57,7 @@ void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery)
     {
     case SCREEN_MAIN:
 
-        drawMain();
+        drawMain(led);
         break;
 
     case SCREEN_SETTINGS:
@@ -74,39 +79,31 @@ void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery)
         break;
 
     case SCREEN_SETTING_BRIGHTNESS_OLED:
+
+        drawDisplayBrightControl(ui);
+        break;
+
     case SCREEN_SETTING_BRIGHTNESS_BLADE:
 
-        drawBrightControl(ui);
+        drawBladeBrightControl(led);
         break;
     }
 
     display.display();
 }
 
-void DisplayManager::drawMain()
+void DisplayManager::drawMain(LedManager led)
 {
+    ColorGroup cg = led.getColorGroup();
+    int colorIndex = led.getColorIndex();
 
-    display.setTextSize(2);
-    display.setCursor(0, 0);
-    display.println("MAIN~");
+    display.setTextSize(1);
+    display.setCursor(findSpaceForCenter(cg.bladeColors[colorIndex].name), 7);
+    display.print(cg.bladeColors[colorIndex].name);
 
-    /*const unsigned char wifiIcon[] PROGMEM = {
-        0b00011000,
-        0b00111100,
-        0b01111110,
-        0b11011011,
-        0b00011000,
-        0b00100100,
-        0b01000010,
-        0b00000000
-    };
+    display.drawBitmap(45, 17, cg.logo, 40, 40, SSD1306_WHITE);
 
-    display.drawBitmap(
-    110, 0,
-    wifiIcon,
-    8, 8,
-    SSD1306_WHITE
-);*/
+    display.display();
 }
 
 void DisplayManager::drawBatteryInfo(BatteryManager battery)
@@ -221,36 +218,54 @@ void DisplayManager::drawAbout()
     display.println("gkdbs-l7");
 }
 
-void DisplayManager::drawBrightControl(const UIManager &ui)
+void DisplayManager::drawDisplayBrightControl(const UIManager &ui)
 {
-    if (ui.getScreen() == SCREEN_SETTING_BRIGHTNESS_OLED)
-    {
-        int brightness = ui.getDisplayBrightness();
-        drawHeader("Display Brightness");
 
-        display.setTextSize(2);
-        display.setCursor(findSpaceForCenter((String)brightness), 20);
-        display.print(brightness);
+    int brightness = ui.getDisplayBrightness();
+    drawHeader("Display Brightness");
 
-        int barX = 8;
-        int barY = 45;
-        int barW = 112;
-        int barH = 10;
+    display.setTextSize(2);
+    display.setCursor(findSpaceForCenter((String)brightness), 20);
+    display.print(brightness);
 
-        display.drawRoundRect(barX, barY, barW, barH, 2, SSD1306_WHITE);
+    int barX = 8;
+    int barY = 45;
+    int barW = 112;
+    int barH = 10;
 
-        int fillW = map(brightness, 0, 255, 0, barW - 2);
-        display.fillRect(barX + 1, barY + 1, fillW, barH - 2, SSD1306_WHITE);
+    display.drawRoundRect(barX, barY, barW, barH, 2, SSD1306_WHITE);
 
-        display.setTextSize(1);
-        display.setCursor(findSpaceForCenter("Turn adjust"), 57);
-        display.print("Turn adjust");
-    }
-    else if (ui.getScreen() == SCREEN_SETTING_BRIGHTNESS_BLADE)
-    {
+    int fillW = map(brightness, 0, 255, 0, barW - 2);
+    display.fillRect(barX + 1, barY + 1, fillW, barH - 2, SSD1306_WHITE);
 
-        drawHeader("Blade Brightness");
-    }
+    display.setTextSize(1);
+    display.setCursor(findSpaceForCenter("Turn adjust"), 57);
+    display.print("Turn adjust");
+}
+
+void DisplayManager::drawBladeBrightControl(LedManager led)
+{
+
+    int brightness = led.getBrightness();
+    drawHeader("Blade Brightness");
+
+    display.setTextSize(2);
+    display.setCursor(findSpaceForCenter((String)brightness), 20);
+    display.print(brightness);
+
+    int barX = 8;
+    int barY = 45;
+    int barW = 112;
+    int barH = 10;
+
+    display.drawRoundRect(barX, barY, barW, barH, 2, SSD1306_WHITE);
+
+    int fillW = map(brightness, 0, 255, 0, barW - 2);
+    display.fillRect(barX + 1, barY + 1, fillW, barH - 2, SSD1306_WHITE);
+
+    display.setTextSize(1);
+    display.setCursor(findSpaceForCenter("Turn adjust"), 57);
+    display.print("Turn adjust");
 }
 
 void DisplayManager::drawHeader(const String title)
