@@ -2,6 +2,7 @@
 #include "BatteryManager.h"
 #include "LedManager.h"
 #include "BoardPins.h"
+#include "WiFiManager.h"
 
 #include "logos/Roselia.h"
 #include "logos/Popipa.h"
@@ -36,7 +37,7 @@ void DisplayManager::begin()
     display.display();
 }
 
-void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, LedManager led)
+void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, LedManager led, WiFiManager wifi)
 {
     if (millis() - lastUpdate < updateInterval)
     {
@@ -87,6 +88,15 @@ void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, 
 
         drawBladeBrightControl(led);
         break;
+
+    case SCREEN_SETTING_ESP_NOW:
+        
+        drawOption(ui);
+        break;
+    }
+
+    if (ui.getScreen() != SCREEN_MAIN) {
+        drawConnectionState(wifi);
     }
 
     display.display();
@@ -191,6 +201,42 @@ void DisplayManager::drawMenu(const UIManager &ui)
     return;
 }
 
+void DisplayManager::drawOption(const UIManager &ui)
+{
+
+    Option option = ui.getOption();
+
+    int offset = ui.getScrollOffset();
+    int selected = ui.getSelectedMenuIndex();
+
+    drawHeader(option.title);
+
+    display.setTextSize(1);
+    display.setCursor(findSpaceForCenter(String(offset + 1) + " / " + String(option.itemCount)), 48);
+    display.print(String(offset + 1) + " / " + String(option.itemCount));
+
+    display.setTextSize(1);
+    display.setCursor(findSpaceForCenter("Push to select"), 57);
+    display.print("Push to select");
+
+    display.fillTriangle(4, 32, 10, 26, 10, 38, SSD1306_WHITE);
+    display.fillTriangle(123, 32, 117, 26, 117, 38, SSD1306_WHITE);
+
+    if (selected == offset)
+    {
+        display.fillRoundRect(16, 21, 96, 22, 5, SSD1306_WHITE);
+        display.setTextColor(SSD1306_BLACK);
+    }
+    else
+    {
+        display.setTextColor(SSD1306_WHITE);
+    }
+
+    display.setTextSize(2);
+    display.setCursor(findSpaceForCenter(option.items[offset].label), 25);
+    display.print(option.items[offset].label);
+}
+
 void DisplayManager::drawAbout()
 {
 
@@ -271,9 +317,30 @@ void DisplayManager::drawBladeBrightControl(LedManager led)
 void DisplayManager::drawHeader(const String title)
 {
     display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
     display.setCursor(findSpaceForCenter(title), 0);
     display.println(title);
     display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
+}
+
+void DisplayManager::drawConnectionState(WiFiManager wifi)
+{
+    if (wifi.getMode() == WIFI_STA)
+    {
+        display.setTextSize(1);
+        display.setCursor(110, 0);
+        display.setTextColor(SSD1306_WHITE);
+        display.println("S");
+        //display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
+    }
+    else if (wifi.getMode() == WIFI_AP)
+    {
+        display.setTextSize(1);
+        display.setCursor(110, 0);
+        display.setTextColor(SSD1306_WHITE);
+        display.println("A");
+        //display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
+    }
 }
 
 int DisplayManager::findSpaceForCenter(String text)

@@ -17,6 +17,11 @@ Menu UIManager::getMenu() const
     return currentMenu;
 }
 
+Option UIManager::getOption() const
+{
+    return currentOption;
+}
+
 int UIManager::getSelectedMenuIndex() const
 {
     return menuSelectedIndex;
@@ -90,6 +95,13 @@ void UIManager::onRotate(int delta)
             // main.cpp 에서 처리
             break;
 
+        case SCREEN_SETTING_ESP_NOW:
+            if (delta > 0 && menuScrollOffset < currentMenu.itemCount - 1) {
+                menuScrollOffset += 1;
+            } else if (delta < 0 && menuScrollOffset > 0) {
+                menuScrollOffset -= 1;
+            }
+            break;
 
     }
     return;
@@ -160,8 +172,6 @@ void UIManager::onClick()
 
         case SCREEN_SETTING_WIFI:
 
-            
-
             currentScreen = SCREEN_SETTING_WIFI;
             currentMenu = SETTING_WIFI_MENU;
             menuSelectedIndex = 0;
@@ -169,6 +179,10 @@ void UIManager::onClick()
             break;
 
         case SCREEN_SETTING_ESP_NOW:
+            currentScreen = SCREEN_SETTING_ESP_NOW;
+            currentOption = COLORSYNC_OPTION;
+            menuSelectedIndex = 0;
+            menuScrollOffset = 0;
             break;
         }
         break;
@@ -216,11 +230,17 @@ void UIManager::onClick()
 
         currentScreen = SCREEN_SETTING_BRIGHTNESS;
         break;
+
+    case SCREEN_SETTING_ESP_NOW:
+        //main.cpp에서 처리
+
+        currentScreen = SCREEN_CONNECTIVITY;
+        currentMenu = SETTING_CONNECTIVITY_MENU;
+        menuSelectedIndex = 0;
+        menuScrollOffset = 0;
+
+        break;
     }
-
-
-
-
     return;
 }
 

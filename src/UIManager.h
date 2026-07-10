@@ -16,6 +16,7 @@ public:
     int getScrollOffset() const;
     Screen getScreen() const;
     Menu getMenu() const; //메뉴있는경우 가지고있는 정보 반환.
+    Option getOption() const;
 
     int getDisplayBrightness() const;
     void changeDisplayBrightness(int delta);
@@ -35,6 +36,7 @@ public:
 private:
     Screen currentScreen = SCREEN_MAIN;
     Menu currentMenu;
+    Option currentOption;
     
 
     //float batteryVoltage = 0.0f;
@@ -48,6 +50,4 @@ private:
 
     int displayBrightness = 255;
 
-    void scrollMenu(int delta);
-    void selectMenu();
 };

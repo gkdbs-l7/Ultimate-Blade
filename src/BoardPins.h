@@ -12,4 +12,4 @@
 #define ENC_DT  17
 #define ENC_SW  18
 
-#define BATTERY_PIN 14
+#define BATTERY_PIN 34

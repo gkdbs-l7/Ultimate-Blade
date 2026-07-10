@@ -30,7 +30,7 @@ const Menu SETTINGS_MENU = {
 const MenuItem SETTING_CONNECTIVITY_ITEMS[] = {
     {"Back", SCREEN_SETTINGS},
     {"WIFI", SCREEN_SETTING_WIFI},
-    {"ESP-NOW", SCREEN_SETTING_ESP_NOW}};
+    {"ColorSync", SCREEN_SETTING_ESP_NOW}};
 
 const Menu SETTING_CONNECTIVITY_MENU = {
     "Connectivity",
@@ -59,3 +59,29 @@ const Menu SETTING_WIFI_MENU = {
     "WIFI",
     SETTING_WIFI_ITEMS,
     2};
+
+
+struct OptionItem
+{
+    const char *label;
+    OptionAction action;
+};
+
+struct Option
+{
+    const char *title;
+    const OptionItem *items;
+    int itemCount;
+};
+
+const OptionItem COLORSYNC_OPTION_ITEMS[] = {
+    {"OFF", COLORSYNC_SYNC_OFF},
+    {"SEND", COLORSYNC_SYNC_SEND},
+    {"RECEIVE", COLORSYNC_SYNC_RECEIVE}
+};
+
+const Option COLORSYNC_OPTION = {
+    "Color Sync",
+    COLORSYNC_OPTION_ITEMS,
+    3
+};

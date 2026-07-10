@@ -6,6 +6,7 @@
 #include "UIManager.h"
 #include "BatteryManager.h"
 #include "LedManager.h"
+#include "WiFiManager.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -14,7 +15,7 @@
 class DisplayManager {
 public:
     void begin();
-    void rander(const UIManager& ui, const BatteryManager& battery, LedManager led);
+    void rander(const UIManager& ui, const BatteryManager& battery, LedManager led, WiFiManager wifi);
 
 private:
     Adafruit_SSD1306 display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -26,11 +27,13 @@ private:
 
     void drawMain(LedManager led);
     void drawMenu(const UIManager& ui);
+    void drawOption(const UIManager& ui);
     void drawDisplayBrightControl(const UIManager& ui);
     void drawBladeBrightControl(LedManager led);
     void drawBatteryInfo(BatteryManager battery);
     //void drawWIFI(const UIManager& ui);
     void drawAbout();
+    void drawConnectionState(WiFiManager wifi);
     int findSpaceForCenter(String text);
 
     void drawHeader(const String title);

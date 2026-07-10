@@ -20,11 +20,16 @@ public:
     void setBrightness(int b);
     int getBrightness();
 
+    void setTargetColor(BladeColor bc);
+
     //void setBrightness(int brightness);
 
     //void fadeToColor(int r, int g, int b, int duration = 500);
 
     //BladeColor getCurrentColor() const;
+
+    bool hasStateChanged();
+    BladeColor getTargetColor() const;
 
 private:
     BladeColor current = BladeColor{
@@ -39,7 +44,7 @@ private:
         0,
         "None"
     };;
-    void setTargetColor(BladeColor bc);
+    
 
     void applyColor();
 
@@ -56,6 +61,8 @@ private:
     int fadeDuration = 500; //500ms
 
     int brightness = 255;
+
+    bool stateChanged = false;
 
 
     //bool fading;

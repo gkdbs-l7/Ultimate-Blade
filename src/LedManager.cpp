@@ -87,6 +87,8 @@ void LedManager::setTargetColor(BladeColor bc) { //클래스 내부용임. 오�
     target = bc;
     fadeStartTime = millis();
     fadeStartColor = current;
+
+    stateChanged = true;
 }
 
 void LedManager::applyColor() {
@@ -102,9 +104,23 @@ void LedManager::applyColor() {
 void LedManager::setBrightness(int b) {
     brightness = constrain(b, 0, 255);
     applyColor();
+    stateChanged = true;
     return;
 }
 
 int LedManager::getBrightness() {
     return brightness;
+}
+
+bool LedManager::hasStateChanged() {
+    if (!stateChanged) {
+        return false;
+    }
+
+    stateChanged = false;
+    return true;
+}
+
+BladeColor LedManager::getTargetColor() const {
+    return target;
 }
