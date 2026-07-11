@@ -27,9 +27,19 @@ int UIManager::getSelectedMenuIndex() const
     return menuSelectedIndex;
 }
 
+void UIManager::setSelectedMenuIndex(int index)
+{
+    menuSelectedIndex = index;
+}
+
 int UIManager::getScrollOffset() const
 {
     return menuScrollOffset;
+}
+
+void UIManager::setScrollOffset(int offset)
+{
+    menuScrollOffset = offset;
 }
 
 int UIManager::getDisplayBrightness() const
@@ -181,7 +191,7 @@ void UIManager::onClick()
         case SCREEN_SETTING_ESP_NOW:
             currentScreen = SCREEN_SETTING_ESP_NOW;
             currentOption = COLORSYNC_OPTION;
-            menuSelectedIndex = 0;
+            //menuSelectedIndex = 0; //초기화는 main.cpp에서
             menuScrollOffset = 0;
             break;
         }

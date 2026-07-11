@@ -3,9 +3,12 @@
 #include "LedManager.h"
 #include "BoardPins.h"
 #include "WiFiManager.h"
+#include "EspNowManager.h"
 
 #include "logos/Roselia.h"
 #include "logos/Popipa.h"
+
+#include "icons.h"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -37,7 +40,7 @@ void DisplayManager::begin()
     display.display();
 }
 
-void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, LedManager led, WiFiManager wifi)
+void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, LedManager& led, WiFiManager& wifi, EspNowManager& espNow)
 {
     if (millis() - lastUpdate < updateInterval)
     {
@@ -96,7 +99,8 @@ void DisplayManager::rander(const UIManager &ui, const BatteryManager &battery, 
     }
 
     if (ui.getScreen() != SCREEN_MAIN) {
-        drawConnectionState(wifi);
+        drawConnectionIcon(wifi, espNow);
+        drawBatteryIcon(battery);
     }
 
     display.display();
@@ -119,7 +123,7 @@ void DisplayManager::drawMain(LedManager led)
 void DisplayManager::drawBatteryInfo(BatteryManager battery)
 {
 
-    drawHeader("Battery Information");
+    drawHeader("Battery Info");
 
     display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
 
@@ -146,6 +150,7 @@ void DisplayManager::drawMenu(const UIManager &ui)
 {
 
     Menu menu = ui.getMenu();
+
 
     int offset = ui.getScrollOffset();
     int selected = ui.getSelectedMenuIndex();
@@ -268,7 +273,7 @@ void DisplayManager::drawDisplayBrightControl(const UIManager &ui)
 {
 
     int brightness = ui.getDisplayBrightness();
-    drawHeader("Display Brightness");
+    drawHeader("Display Bright");
 
     display.setTextSize(2);
     display.setCursor(findSpaceForCenter((String)brightness), 20);
@@ -293,7 +298,7 @@ void DisplayManager::drawBladeBrightControl(LedManager led)
 {
 
     int brightness = led.getBrightness();
-    drawHeader("Blade Brightness");
+    drawHeader("Blade Bright");
 
     display.setTextSize(2);
     display.setCursor(findSpaceForCenter((String)brightness), 20);
@@ -321,17 +326,26 @@ void DisplayManager::drawHeader(const String title)
     display.setCursor(findSpaceForCenter(title), 0);
     display.println(title);
     display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
+
 }
 
-void DisplayManager::drawConnectionState(WiFiManager wifi)
+void DisplayManager::drawConnectionIcon(WiFiManager& wifi, EspNowManager& espNow)
 {
+    //int dx = 120;
+    int dx = 0;
+
     if (wifi.getMode() == WIFI_STA)
     {
-        display.setTextSize(1);
-        display.setCursor(110, 0);
-        display.setTextColor(SSD1306_WHITE);
-        display.println("S");
-        //display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
+        display.drawBitmap(dx, 0, wifiIcon, 8, 8, SSD1306_WHITE);
+            dx += 8;
+
+        if (espNow.getMode() == EspNowManager::SYNC_RECEIVE) {
+            display.drawBitmap(dx, 0, espReceiveIcon, 8, 8, SSD1306_WHITE);
+        } else if (espNow.getMode() == EspNowManager::SYNC_SEND) {
+            display.drawBitmap(dx, 0, espSendIcon, 8, 8, SSD1306_WHITE);
+        }
+        //display.drawLine(dx, 0, dx + 7, 7, SSD1306_WHITE);
+        //display.drawLine(dx + 7, 0, dx, 7, SSD1306_WHITE);
     }
     else if (wifi.getMode() == WIFI_AP)
     {
@@ -341,6 +355,26 @@ void DisplayManager::drawConnectionState(WiFiManager wifi)
         display.println("A");
         //display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
     }
+}
+
+void DisplayManager::drawBatteryIcon(BatteryManager battery) {
+    const int persent = battery.getPercent();
+
+    const int batX = 116;
+    if (persent >= 80) {
+        display.drawBitmap(batX, 0, batteryIcon100, 12, 8, SSD1306_WHITE);
+    } else if (persent >= 60) {
+        display.drawBitmap(batX, 0, batteryIcon80, 12, 8, SSD1306_WHITE);
+    } else if (persent >= 40) {
+        display.drawBitmap(batX, 0, batteryIcon60, 12, 8, SSD1306_WHITE);
+    } else if (persent >= 20) {
+        display.drawBitmap(batX, 0, batteryIcon40, 12, 8, SSD1306_WHITE);
+    } else if (persent >= 10) {
+        display.drawBitmap(batX, 0, batteryIcon20, 12, 8, SSD1306_WHITE);
+    } else {
+        display.drawBitmap(batX, 0, batteryIcon10, 12, 8, SSD1306_WHITE);
+    }
+    
 }
 
 int DisplayManager::findSpaceForCenter(String text)

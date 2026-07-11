@@ -29,7 +29,7 @@ const Menu SETTINGS_MENU = {
 
 const MenuItem SETTING_CONNECTIVITY_ITEMS[] = {
     {"Back", SCREEN_SETTINGS},
-    {"WIFI", SCREEN_SETTING_WIFI},
+    {"WiFi", SCREEN_SETTING_WIFI},
     {"ColorSync", SCREEN_SETTING_ESP_NOW}};
 
 const Menu SETTING_CONNECTIVITY_MENU = {

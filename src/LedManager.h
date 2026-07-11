@@ -22,6 +22,8 @@ public:
 
     void setTargetColor(BladeColor bc);
 
+    void setLED(int r, int g, int b);
+
     //void setBrightness(int brightness);
 
     //void fadeToColor(int r, int g, int b, int duration = 500);
@@ -33,9 +35,9 @@ public:
 
 private:
     BladeColor current = BladeColor{
-        0,
-        0,
-        0,
+        255,
+        255,
+        255,
         "None"
     };
     BladeColor target = BladeColor{

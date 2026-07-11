@@ -8,7 +8,6 @@
 #define CH_B 2
 
 void LedManager::begin() {
-    setColorGroupFade(ROSELIA);
     ledcSetup(CH_R, 5000, 8);
     ledcSetup(CH_G, 5000, 8);
     ledcSetup(CH_B, 5000, 8);
@@ -30,10 +29,7 @@ void LedManager::update() {
     if (elapsed >= fadeDuration) {
         current = target;
 
-        ledcWrite(CH_R, constrain(current.r, 0, 255));
-        ledcWrite(CH_G, constrain(current.g, 0, 255));
-        ledcWrite(CH_B, constrain(current.b, 0, 255));
-
+        applyColor();
         return;
     }
 
@@ -96,9 +92,7 @@ void LedManager::applyColor() {
     int g = current.g * brightness / 255;
     int b = current.b * brightness / 255;
 
-    ledcWrite(CH_R, constrain(r, 0, 255));
-    ledcWrite(CH_G, constrain(g, 0, 255));
-    ledcWrite(CH_B, constrain(b, 0, 255));
+    setLED(r, g, b);
 }
 
 void LedManager::setBrightness(int b) {
@@ -123,4 +117,10 @@ bool LedManager::hasStateChanged() {
 
 BladeColor LedManager::getTargetColor() const {
     return target;
+}
+
+void LedManager::setLED(int r, int g, int b) {
+    ledcWrite(CH_R, constrain(r, 0, 255));
+    ledcWrite(CH_G, constrain(g, 0, 255));
+    ledcWrite(CH_B, constrain(b, 0, 255));
 }

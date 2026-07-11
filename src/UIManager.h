@@ -14,6 +14,8 @@ public:
 
     int getSelectedMenuIndex() const;
     int getScrollOffset() const;
+    void setSelectedMenuIndex(int index);
+    void setScrollOffset(int offset);
     Screen getScreen() const;
     Menu getMenu() const; //메뉴있는경우 가지고있는 정보 반환.
     Option getOption() const;

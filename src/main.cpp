@@ -27,15 +27,42 @@ void setup()
 {
   Serial.begin(115200);
   display.begin();
+  led.begin();
 
-  delay(2000); // 처음 켤때 adc 크게 측정됨 방지
+  // 빨 → 주 → 노 → 초 → 파 → 남 → 보 부팅 애니메이션
+  const int fadeDelay = 8;
+
+  int colors[][3] = {
+      {255, 0, 0},
+      {255, 127, 0},
+      {255, 255, 0},
+      {0, 255, 0},
+      {0, 0, 255},
+      {75, 0, 130},
+      {148, 0, 211},
+      {255, 255, 255} // 마지막 흰색
+  };
+
+  for (int c = 0; c < 7; c++)
+  {
+    for (int t = 0; t <= 255; t += 8)
+    {
+      led.setLED(
+          colors[c][0] + (colors[c + 1][0] - colors[c][0]) * t / 255,
+          colors[c][1] + (colors[c + 1][1] - colors[c][1]) * t / 255,
+          colors[c][2] + (colors[c + 1][2] - colors[c][2]) * t / 255);
+      delay(fadeDelay);
+    }
+  }
+
+  led.setColorGroupFade(ROSELIA);
+
+  // delay(2000); // 처음 켤때 adc 크게 측정됨 방지
 
   encoder.begin();
   battery.begin();
-  led.begin();
 
-  //espNow.setMode(EspNowManager::SYNC_RECEIVE, wifi);
-
+  // espNow.setMode(EspNowManager::SYNC_RECEIVE, wifi);
 }
 
 void loop()
@@ -100,10 +127,28 @@ void loop()
       }
       ui.onClick();
     }
+    else if (ui.getMenu().items[ui.getSelectedMenuIndex()].targetScreen == SCREEN_SETTING_ESP_NOW)
+    {
+      ui.onClick();
+      if (espNow.getMode() == EspNowManager::SYNC_OFF)
+      {
+        ui.setSelectedMenuIndex(0);
+      }
+      else if (espNow.getMode() == EspNowManager::SYNC_SEND)
+      {
+        ui.setSelectedMenuIndex(1);
+      }
+      else if (espNow.getMode() == EspNowManager::SYNC_RECEIVE)
+      {
+        ui.setSelectedMenuIndex(2);
+      }
+    }
     else
     {
       ui.onClick();
     }
+
+    // Serial.println("클릭");
   }
 
   if (encoder.isLongPressed())
@@ -141,5 +186,5 @@ void loop()
   }
 
   led.update();
-  display.rander(ui, battery, led, wifi);
+  display.rander(ui, battery, led, wifi, espNow);
 }
